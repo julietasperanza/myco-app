@@ -1,0 +1,176 @@
+<div id="vista-puzzle" class="view">
+  <div class="top-nav">
+    <div class="marca">myco<span>.</span></div>
+    <div class="top-nav-derecha">
+      <span onclick="irAPerfil()" style="display:flex; align-items:center; cursor:pointer;" title="Editar mi perfil">
+        <span class="avatar-badge" data-avatar-badge></span>
+        <span class="nombre-badge" data-nombre-badge></span>
+      </span>
+      <span class="link-salir" onclick="irAlPanel()">Inicio</span>
+    </div>
+  </div>
+  <?!= include('RootDivider'); ?>
+  <div class="card centro">
+    <span class="eyebrow">Turkey Tail · equilibrio</span>
+    <h2>Escudo del bosque</h2>
+    <p class="mb-16">Deslizá el hongito de lado a lado para bloquear los gérmenes antes de que lleguen al piso.</p>
+
+    <div class="nota-conexion">
+      <span class="eyebrow">Por qué esta experiencia</span>
+      <p>Turkey Tail apoya el sistema inmunológico. Este juego simula justamente eso: proteger tu organismo bloqueando amenazas, como hacen tus defensas todos los días.</p>
+    </div>
+
+    <canvas id="canvas-escudo" width="380" height="300" style="width:100%; max-width:380px; background:#22362A; border-radius:16px; margin-bottom:12px; touch-action:none;"></canvas>
+    <p style="font-family:'JetBrains Mono', monospace; font-size:13px;" id="escudo-score">Defensas: 0 · Vidas: 🍃🍃🍃</p>
+
+    <button class="btn btn-secundario" onclick="irACuestionario()">Repetir el cuestionario</button>
+  </div>
+</div>
+
+<script>
+  var escudoCtx, escudoCanvas, escudoLoop, escudoActivo = false;
+  var escudoShield, escudoGermenes, escudoPuntaje, escudoVidas, escudoVelocidadBase, escudoTicks;
+
+  function iniciarJuegoPuzzle() {
+    escudoCanvas = document.getElementById('canvas-escudo');
+    escudoCtx = escudoCanvas.getContext('2d');
+    escudoShield = { x: 190, w: 72 };
+    escudoGermenes = [];
+    escudoPuntaje = 0;
+    escudoVidas = 5;
+    escudoVelocidadBase = 1.0;
+    escudoTicks = 0;
+    escudoActivo = true;
+    actualizarMarcadorEscudo();
+
+    if (escudoLoop) clearInterval(escudoLoop);
+    escudoLoop = setInterval(pasoEscudo, 1000/45);
+
+    escudoCanvas.onpointerdown = moverShieldDesdeEvento;
+    escudoCanvas.onpointermove = function(e){ if (e.buttons === 1 || e.pointerType === 'touch') moverShieldDesdeEvento(e); };
+
+    spawnGermen();
+  }
+
+  function moverShieldDesdeEvento(e) {
+    var rect = escudoCanvas.getBoundingClientRect();
+    var escala = 380 / rect.width;
+    var x = (e.clientX - rect.left) * escala;
+    escudoShield.x = Math.max(escudoShield.w/2, Math.min(380 - escudoShield.w/2, x));
+  }
+
+  function spawnGermen() {
+    if (!escudoActivo) return;
+    var colores = ['#D85A30', '#993C1D', '#712B13'];
+    escudoGermenes.push({
+      x: 20 + Math.random() * 340,
+      y: -20,
+      r: 12 + Math.random() * 6,
+      color: colores[Math.floor(Math.random() * colores.length)]
+    });
+    var intervalo = Math.max(500, 1300 - escudoTicks * 2);
+    setTimeout(spawnGermen, intervalo);
+  }
+
+  function pasoEscudo() {
+    if (!escudoActivo) return;
+    escudoTicks++;
+    var velocidad = escudoVelocidadBase + escudoTicks / 600;
+
+    escudoGermenes.forEach(function(g){ g.y += velocidad; });
+
+    var restantes = [];
+    escudoGermenes.forEach(function(g){
+      var yShield = 268;
+      if (g.y >= yShield - 6 && g.y <= yShield + 14 &&
+          g.x > escudoShield.x - escudoShield.w/2 && g.x < escudoShield.x + escudoShield.w/2) {
+        escudoPuntaje++;
+        actualizarMarcadorEscudo();
+        return;
+      }
+      if (g.y > 300) {
+        escudoVidas--;
+        actualizarMarcadorEscudo();
+        if (escudoVidas <= 0) { finEscudo(); }
+        return;
+      }
+      restantes.push(g);
+    });
+    escudoGermenes = restantes;
+
+    // Si el juego ya terminó (finEscudo ya dibujó la pantalla final), no lo pisemos con el frame normal.
+    if (!escudoActivo) return;
+
+    dibujarEscudo();
+  }
+
+  function dibujarEscudo() {
+    escudoCtx.clearRect(0,0,380,300);
+    escudoCtx.fillStyle = '#5C7A52';
+    escudoCtx.fillRect(0,296,380,4);
+
+    escudoGermenes.forEach(function(g){ dibujarGermen(g); });
+    dibujarHongitoShield();
+  }
+
+  function dibujarGermen(g) {
+    escudoCtx.strokeStyle = g.color;
+    escudoCtx.lineWidth = 3;
+    for (var i = 0; i < 8; i++) {
+      var ang = (i / 8) * Math.PI * 2;
+      escudoCtx.beginPath();
+      escudoCtx.moveTo(g.x + Math.cos(ang) * g.r, g.y + Math.sin(ang) * g.r);
+      escudoCtx.lineTo(g.x + Math.cos(ang) * (g.r + 7), g.y + Math.sin(ang) * (g.r + 7));
+      escudoCtx.stroke();
+    }
+    escudoCtx.fillStyle = g.color;
+    escudoCtx.beginPath();
+    escudoCtx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
+    escudoCtx.fill();
+    escudoCtx.fillStyle = '#22362A';
+    escudoCtx.beginPath();
+    escudoCtx.arc(g.x - 4, g.y - 2, 1.8, 0, Math.PI * 2);
+    escudoCtx.arc(g.x + 4, g.y - 2, 1.8, 0, Math.PI * 2);
+    escudoCtx.fill();
+  }
+
+  function dibujarHongitoShield() {
+    var cx = escudoShield.x, baseY = 280;
+
+    escudoCtx.fillStyle = '#FBF8F0';
+    escudoCtx.fillRect(cx - 6, baseY - 10, 12, 18);
+
+    escudoCtx.fillStyle = '#C9A227';
+    escudoCtx.beginPath();
+    escudoCtx.ellipse(cx, baseY - 10, escudoShield.w/2, 18, 0, Math.PI, 2*Math.PI);
+    escudoCtx.fill();
+
+    escudoCtx.fillStyle = '#8B6A4B';
+    escudoCtx.beginPath();
+    escudoCtx.arc(cx - 14, baseY - 18, 2.6, 0, Math.PI*2);
+    escudoCtx.arc(cx + 10, baseY - 20, 2.2, 0, Math.PI*2);
+    escudoCtx.arc(cx, baseY - 13, 2, 0, Math.PI*2);
+    escudoCtx.fill();
+  }
+
+  function actualizarMarcadorEscudo() {
+    var vidasTexto = '';
+    for (var i = 0; i < escudoVidas; i++) vidasTexto += '🍃';
+    if (escudoVidas <= 0) vidasTexto = '—';
+    document.getElementById('escudo-score').textContent = 'Defensas: ' + escudoPuntaje + ' · Vidas: ' + vidasTexto;
+  }
+
+  function finEscudo() {
+    escudoActivo = false;
+    clearInterval(escudoLoop);
+    escudoCtx.fillStyle = 'rgba(34,54,42,0.88)';
+    escudoCtx.fillRect(0,0,380,300);
+    escudoCtx.fillStyle = '#FBF8F0';
+    escudoCtx.font = '16px sans-serif';
+    escudoCtx.textAlign = 'center';
+    escudoCtx.fillText('¡Buen trabajo defendiendo! Defensas: ' + escudoPuntaje, 190, 140);
+    escudoCtx.font = '13px sans-serif';
+    escudoCtx.fillText('Tocá la pantalla para reintentar', 190, 165);
+    escudoCanvas.onpointerdown = function(){ iniciarJuegoPuzzle(); };
+  }
+</script>

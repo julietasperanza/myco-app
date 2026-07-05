@@ -1,0 +1,410 @@
+<script>
+  // ---------- Estado global de cliente ----------
+  var ESTADO = {
+    token: null,
+    nombre: null,
+    ciudad: '',
+    avatar: 'a1',
+    preguntas: [],
+    respuestas: {},
+    preguntaActual: 0,
+    resultado: null
+  };
+
+  var COLORES_AVATAR = { a1: '#C9A227', a2: '#8B6A4B', a3: '#5C7A52', a4: '#22362A', a5: '#B9C4AD' };
+
+  function pintarAvatares() {
+    var color = COLORES_AVATAR[ESTADO.avatar] || COLORES_AVATAR.a1;
+    document.querySelectorAll('[data-avatar-badge]').forEach(function(el){
+      el.style.background = color;
+      el.textContent = '🍄';
+    });
+    document.querySelectorAll('[data-nombre-badge]').forEach(function(el){
+      el.textContent = ESTADO.nombre || '';
+    });
+  }
+
+  function elegirAvatar(id) {
+    ESTADO.avatar = id;
+    document.querySelectorAll('#grilla-avatares .opcion-avatar').forEach(function(btn){
+      btn.classList.toggle('seleccionado', btn.getAttribute('data-avatar') === id);
+    });
+    pintarAvatares();
+  }
+
+  function elegirAvatarPerfil(id) {
+    ESTADO.avatar = id;
+    document.querySelectorAll('#grilla-avatares-perfil .opcion-avatar').forEach(function(btn){
+      btn.classList.toggle('seleccionado', btn.getAttribute('data-avatar') === id);
+    });
+    pintarAvatares();
+  }
+
+  var CLAVE_TOKEN = 'myco_token';
+  var CLAVE_ONBOARDING = 'myco_onboarding_visto';
+  var navegoManualmente = false;
+
+  // ---------- Arranque de la app ----------
+  window.addEventListener('DOMContentLoaded', function () {
+    var tokenGuardado = localStorage.getItem(CLAVE_TOKEN);
+    if (!tokenGuardado) {
+      mostrarVista('vista-bienvenida');
+      navegoManualmente = false; // esto no cuenta como navegación del usuario
+      return;
+    }
+    google.script.run
+      .withSuccessHandler(function (res) {
+        // Si mientras esperábamos esta respuesta el usuario ya tocó "Crear cuenta" o
+        // "Ya tengo cuenta", no lo interrumpimos empujándolo al panel.
+        if (navegoManualmente) return;
+
+        if (!res.ok) {
+          localStorage.removeItem(CLAVE_TOKEN);
+          mostrarVista('vista-bienvenida');
+          navegoManualmente = false;
+          return;
+        }
+        ESTADO.token = tokenGuardado;
+        ESTADO.nombre = res.nombre;
+        if (res.debeCambiarPassword) {
+          mostrarVista('vista-cambiar-password');
+        } else {
+          irAlPanel();
+          mostrarOnboardingSiCorresponde();
+        }
+      })
+      .withFailureHandler(function () {
+        if (navegoManualmente) return;
+        localStorage.removeItem(CLAVE_TOKEN);
+        mostrarVista('vista-bienvenida');
+        navegoManualmente = false;
+      })
+      .validarSesion(tokenGuardado);
+  });
+
+  function mostrarVista(id) {
+    navegoManualmente = true;
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('activa'); });
+    document.getElementById(id).classList.add('activa');
+    window.scrollTo(0,0);
+  }
+
+  function mostrarError(idContenedor, mensaje) {
+    var el = document.getElementById(idContenedor);
+    el.textContent = mensaje;
+    el.style.display = 'block';
+  }
+  function ocultarError(idContenedor) {
+    document.getElementById(idContenedor).style.display = 'none';
+  }
+
+  // ---------- ONBOARDING CÁLIDO (una sola vez) ----------
+  function mostrarOnboardingSiCorresponde() {
+    if (!localStorage.getItem(CLAVE_ONBOARDING)) {
+      document.getElementById('modal-onboarding').classList.add('activo');
+    }
+  }
+  function cerrarOnboarding() {
+    localStorage.setItem(CLAVE_ONBOARDING, '1');
+    document.getElementById('modal-onboarding').classList.remove('activo');
+    google.script.run.guardarAvatar(ESTADO.token, ESTADO.avatar);
+  }
+
+  // Permite volver a ver el aviso médico + selector de hongito en cualquier momento, desde el panel.
+  function verAvisoImportante() {
+    document.getElementById('modal-onboarding').classList.add('activo');
+  }
+
+  // ---------- REGISTRO ----------
+  function enviarRegistro() {
+    ocultarError('error-registro');
+    var nombre = document.getElementById('reg-nombre').value;
+    var email = document.getElementById('reg-email').value;
+    document.getElementById('btn-registro').textContent = 'Enviando...';
+    google.script.run
+      .withSuccessHandler(function(res){
+        document.getElementById('btn-registro').textContent = 'Crear cuenta';
+        if (!res.ok) { mostrarError('error-registro', res.error); return; }
+        document.getElementById('registro-ok-email').textContent = email;
+        document.getElementById('login-email').value = email;
+        mostrarVista('vista-registro-ok');
+      })
+      .withFailureHandler(function(err){
+        document.getElementById('btn-registro').textContent = 'Crear cuenta';
+        mostrarError('error-registro', 'Ocurrió un error. Probá de nuevo.');
+      })
+      .registrarUsuario(nombre, email);
+  }
+
+  // ---------- LOGIN ----------
+  function enviarLogin() {
+    ocultarError('error-login');
+    var email = document.getElementById('login-email').value;
+    var password = document.getElementById('login-password').value;
+    document.getElementById('btn-login').textContent = 'Ingresando...';
+    google.script.run
+      .withSuccessHandler(function(res){
+        document.getElementById('btn-login').textContent = 'Ingresar';
+        if (!res.ok) { mostrarError('error-login', res.error); return; }
+        ESTADO.token = res.token;
+        ESTADO.nombre = res.nombre;
+        localStorage.setItem(CLAVE_TOKEN, res.token);
+        if (res.debeCambiarPassword) {
+          mostrarVista('vista-cambiar-password');
+        } else {
+          irAlPanel();
+          mostrarOnboardingSiCorresponde();
+        }
+      })
+      .withFailureHandler(function(){
+        document.getElementById('btn-login').textContent = 'Ingresar';
+        mostrarError('error-login', 'Ocurrió un error. Probá de nuevo.');
+      })
+      .login(email, password);
+  }
+
+  // ---------- CAMBIO DE CONTRASEÑA OBLIGATORIO ----------
+  function enviarCambioPassword() {
+    ocultarError('error-cambio-password');
+    var nueva = document.getElementById('nueva-password').value;
+    var repetir = document.getElementById('repetir-password').value;
+    if (nueva !== repetir) { mostrarError('error-cambio-password', 'Las contraseñas no coinciden.'); return; }
+
+    google.script.run
+      .withSuccessHandler(function(res){
+        if (!res.ok) { mostrarError('error-cambio-password', res.error); return; }
+        localStorage.setItem(CLAVE_TOKEN, ESTADO.token);
+        irAlPanel();
+        mostrarOnboardingSiCorresponde();
+      })
+      .withFailureHandler(function(){ mostrarError('error-cambio-password', 'Ocurrió un error. Probá de nuevo.'); })
+      .cambiarPassword(ESTADO.token, nueva);
+  }
+
+  // ---------- OLVIDÉ MI CONTRASEÑA ----------
+  function irARecuperar() {
+    ocultarError('error-recuperar');
+    mostrarVista('vista-recuperar');
+  }
+
+  function enviarRecuperacion() {
+    ocultarError('error-recuperar');
+    var email = document.getElementById('recuperar-email').value;
+    if (!email) { mostrarError('error-recuperar', 'Ingresá tu email.'); return; }
+    document.getElementById('btn-recuperar').textContent = 'Enviando...';
+    google.script.run
+      .withSuccessHandler(function(){
+        document.getElementById('btn-recuperar').textContent = 'Enviar contraseña temporal';
+        document.getElementById('recuperar-ok-email').textContent = email;
+        document.getElementById('login-email').value = email;
+        mostrarVista('vista-recuperar-ok');
+      })
+      .withFailureHandler(function(){
+        document.getElementById('btn-recuperar').textContent = 'Enviar contraseña temporal';
+        mostrarError('error-recuperar', 'Ocurrió un error. Probá de nuevo.');
+      })
+      .solicitarRecuperacionPassword(email);
+  }
+
+  // ---------- CIERRE DE SESIÓN REAL (borra el token) ----------
+  function cerrarSesionCliente() {
+    google.script.run.cerrarSesion(ESTADO.token);
+    localStorage.removeItem(CLAVE_TOKEN);
+    ESTADO = { token:null, nombre:null, ciudad:'', preguntas:[], respuestas:{}, preguntaActual:0, resultado:null };
+    mostrarVista('vista-bienvenida');
+  }
+
+  // ---------- PANEL (home autenticado, NO cierra sesión) ----------
+  function irAlPanel() {
+    document.getElementById('panel-saludo').textContent = 'Hola, ' + ESTADO.nombre + ' 🌿';
+    pintarAvatares();
+    mostrarVista('vista-panel');
+
+    google.script.run
+      .withSuccessHandler(function(res){
+        var bloque = document.getElementById('panel-ultimo-resultado');
+        if (res.ok && res.hayResultado) {
+          bloque.style.display = 'block';
+          document.getElementById('panel-ultimo-hongo').textContent = res.hongo;
+          ESTADO.resultado = res;
+        } else {
+          bloque.style.display = 'none';
+        }
+      })
+      .obtenerUltimaRecomendacion(ESTADO.token);
+
+    google.script.run
+      .withSuccessHandler(function(perfil){
+        if (perfil.ok) {
+          ESTADO.ciudad = perfil.ciudad || '';
+          ESTADO.avatar = perfil.avatar || 'a1';
+          pintarAvatares();
+        }
+      })
+      .obtenerPerfil(ESTADO.token);
+  }
+
+  // ---------- PERFIL ----------
+  function irAPerfil() {
+    google.script.run
+      .withSuccessHandler(function(res){
+        if (res.ok) {
+          document.getElementById('perfil-nombre').value = res.nombre || '';
+          document.getElementById('perfil-edad').value = res.edad || '';
+          document.getElementById('perfil-ciudad').value = res.ciudad || '';
+          ESTADO.ciudad = res.ciudad || '';
+          ESTADO.avatar = res.avatar || 'a1';
+          document.querySelectorAll('#grilla-avatares-perfil .opcion-avatar').forEach(function(btn){
+            btn.classList.toggle('seleccionado', btn.getAttribute('data-avatar') === ESTADO.avatar);
+          });
+          pintarAvatares();
+        }
+        mostrarVista('vista-perfil');
+      })
+      .obtenerPerfil(ESTADO.token);
+  }
+
+  function guardarPerfilCliente() {
+    var nombre = document.getElementById('perfil-nombre').value;
+    var edad = document.getElementById('perfil-edad').value;
+    var ciudad = document.getElementById('perfil-ciudad').value;
+    document.getElementById('btn-guardar-perfil').textContent = 'Guardando...';
+    google.script.run
+      .withSuccessHandler(function(res){
+        document.getElementById('btn-guardar-perfil').textContent = 'Guardar';
+        ESTADO.ciudad = ciudad;
+        if (res.nombre) ESTADO.nombre = res.nombre;
+        google.script.run.guardarAvatar(ESTADO.token, ESTADO.avatar);
+        irAlPanel();
+      })
+      .withFailureHandler(function(){
+        document.getElementById('btn-guardar-perfil').textContent = 'Guardar';
+      })
+      .guardarPerfil(ESTADO.token, nombre, edad, ciudad);
+  }
+
+  // ---------- CUESTIONARIO ----------
+  function irACuestionario() {
+    google.script.run
+      .withSuccessHandler(function(preguntas){
+        ESTADO.preguntas = preguntas;
+        ESTADO.respuestas = {};
+        ESTADO.preguntaActual = 0;
+        mostrarVista('vista-cuestionario');
+        renderizarPregunta();
+      })
+      .getPreguntas();
+  }
+
+  function renderizarPregunta() {
+    var pregunta = ESTADO.preguntas[ESTADO.preguntaActual];
+    var total = ESTADO.preguntas.length;
+    document.getElementById('progreso-fill').style.width = ((ESTADO.preguntaActual) / total * 100) + '%';
+    document.getElementById('pregunta-texto').textContent = pregunta.texto;
+    document.getElementById('pregunta-contador').textContent = 'Paso ' + (ESTADO.preguntaActual + 1) + ' de ' + total;
+
+    var cont = document.getElementById('opciones-container');
+    cont.innerHTML = '';
+    pregunta.opciones.forEach(function(op, idx){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'opcion-pregunta';
+      btn.textContent = op.texto;
+      btn.onclick = function(){ seleccionarOpcion(pregunta.id, idx); };
+      cont.appendChild(btn);
+    });
+  }
+
+  function seleccionarOpcion(idPregunta, idxOpcion) {
+    ESTADO.respuestas[idPregunta] = idxOpcion;
+    if (ESTADO.preguntaActual < ESTADO.preguntas.length - 1) {
+      ESTADO.preguntaActual++;
+      renderizarPregunta();
+    } else {
+      finalizarCuestionario();
+    }
+  }
+
+  function finalizarCuestionario() {
+    mostrarVista('vista-cargando');
+    google.script.run
+      .withSuccessHandler(function(res){
+        if (!res.ok) { mostrarVista('vista-cuestionario'); return; }
+        ESTADO.resultado = res;
+        mostrarResultado(res);
+      })
+      .withFailureHandler(function(){ mostrarVista('vista-cuestionario'); })
+      .enviarRespuestasCuestionario(ESTADO.token, ESTADO.respuestas);
+  }
+
+  // ---------- RESULTADO + MAPA + HÁBITOS + BENEFICIOS + CONSUMO ----------
+  function mostrarResultado(res) {
+    document.getElementById('resultado-hongo').textContent = res.hongo;
+    document.getElementById('resultado-beneficio').textContent = res.beneficio;
+    document.getElementById('resultado-descripcion').textContent = res.descripcion;
+
+    var listaBeneficios = document.getElementById('lista-beneficios');
+    listaBeneficios.innerHTML = '';
+    (res.beneficiosClave || []).forEach(function(b){
+      var li = document.createElement('li');
+      li.textContent = b;
+      listaBeneficios.appendChild(li);
+    });
+    document.getElementById('bloque-beneficios').style.display = (res.beneficiosClave && res.beneficiosClave.length) ? 'block' : 'none';
+
+    var listaHabitos = document.getElementById('lista-habitos');
+    listaHabitos.innerHTML = '';
+    (res.habitos || []).forEach(function(h){
+      var li = document.createElement('li');
+      li.textContent = h;
+      listaHabitos.appendChild(li);
+    });
+    document.getElementById('bloque-habitos').style.display = (res.habitos && res.habitos.length) ? 'block' : 'none';
+
+    document.getElementById('texto-consumo').textContent = res.consumo || '';
+    document.getElementById('bloque-consumo').style.display = res.consumo ? 'block' : 'none';
+
+    mostrarVista('vista-resultado');
+
+    google.script.run
+      .withSuccessHandler(function(datos){ renderizarPuntosVenta(datos, res.hongo); })
+      .getPuntosDeVentaPorHongo(res.hongo, ESTADO.ciudad);
+  }
+
+  function renderizarPuntosVenta(datos, hongo) {
+    var cont = document.getElementById('lista-puntos-venta');
+    var mapaFrame = document.getElementById('mapa-iframe');
+    cont.innerHTML = '';
+
+    var puntos = datos.puntos || [];
+
+    if (!puntos.length) {
+      var q = encodeURIComponent(datos.busquedaGenerica || ('comprar ' + hongo));
+      mapaFrame.src = 'https://maps.google.com/maps?q=' + q + '&z=12&output=embed';
+      cont.innerHTML = '<p>Todavía no cargamos puntos de venta específicos para ' + hongo + '. Te mostramos una búsqueda general en tu zona.</p>';
+      return;
+    }
+
+    var q = encodeURIComponent(puntos[0].nombre + ' ' + puntos[0].direccion);
+    mapaFrame.src = 'https://maps.google.com/maps?q=' + q + '&z=13&output=embed';
+
+    puntos.forEach(function(p){
+      var div = document.createElement('div');
+      div.className = 'punto-venta';
+      div.innerHTML = '<strong>' + p.nombre + '</strong><br>' + p.direccion + (p.telefono ? '<br>' + p.telefono : '');
+      cont.appendChild(div);
+    });
+  }
+
+  function irAExperiencia() {
+    var tipo = ESTADO.resultado.experiencia;
+    if (tipo === 'playlist') mostrarVista('vista-playlist');
+    else if (tipo === 'runner') { mostrarVista('vista-runner'); iniciarJuegoRunner(); }
+    else if (tipo === 'memoria') { mostrarVista('vista-memoria'); iniciarJuegoMemoria(); }
+    else if (tipo === 'puzzle') { mostrarVista('vista-puzzle'); iniciarJuegoPuzzle(); }
+  }
+
+  function verUltimoResultadoDesdePanel() {
+    if (ESTADO.resultado) mostrarResultado(ESTADO.resultado);
+  }
+</script>

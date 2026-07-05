@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFXUlEQVR4nMWX34tdVxXHP2vtc++5N3PnV5KW+ZFJJ0lFOrETLUmqDz4EoVAbUkod0z+g+NaCFIKP+iA+iaDgc/HN1jxYRFAo+KIQjVjTTEuibSaNEyZJp5lLZnJ/nb2WD/tOMjPJndw0RTccuOece/b3u9b67vVDAJibC7z9dnzi0JenQyV7XZzjjk2DZIDwaMvBC0EXXPhdbBY/v/zPCwvrmLL+Y/rIU98Nqr8QlcfdHHd/RNzNS0QQFdz8ejR7beFvH77F3FwQgH3PHnw5qP7GzTCzKCLKo1u+dbm7m6oGUSWafefSmfnTcuDwwSlXPyciw25uCOELBt5Cgygq6u51MZlVE39Dg478T8ABhODmpkFHTPyNTPATbu4I+lD7yN0YOfBQkhHUzV3wExmw1937jrdqAmsXUMT0LAtQChAUovVHoSvyvRkifbldBHC41YA8g4lR2F1zRGB5Vbh6E9ZaMJCDClg/HhEJWT/gKsliB54/5Dw360zvdqrl9L7ZgU+WhXfPC384J3Qc8hJYH96Q/UdntuWqkgB2DsD3v20cPeB0YiK0DiAilDMnz+C9y8JPf68srUA1fzCJbYW3bvmuGvz4pHFkv7NyGxrtpAORdGUhUphxcw1m9zo/eSUyMQrNdtrjcxMwT6I7ddx4ciyy1jYy3bypCHyyOMq1G0OUS079NowNww9OGJVSEuV2HHoSCAqrTXjpsHP4gHF5qcryZ4NJjHc85LTaGfMXxrn48eOYCVlIQp2ZdF75hrPWSkY8FAEhuX5sGF46Ern2WZn3P9jDP96fYnFpmCwY7oK5kJcLZg8uMvOlJVQcEScLsNp0XvhaZPqxpCHp4Yb7ElBNcT72lcjYqNHqCI7gDmaCaNKtSNLC5Fid3btWcaDTCbx3fg9/P7+HWq4cmzFand5auC8Bc6iUnX3DNZZuDDAy3OTQzCJPz1xlauImjWaJv5zdx78XdpMFo90OdApF1Wk0S9xYrvHpco1bayWOPmnsKPdOUPfkAQGK6OzcEVi5Nsm5Votnn7nErpE1RCFGQcSpDbSo5AUOiKSEFKMyNNhkdmYRVaeUt5gIwvgo/GcZyqV7U/a9BAQ6hTC+M/L1r17FJYJAEQNEujF2nnn6CrgQo26Kr7swOV4Hh3ah7MhhfMRZuCHkpGS2LYH1EIzugKmJOqvNZNndT5MWYrx/Bnd32p0AOG5JTztrac/1dP5ADzhQLUNAUQfNNoanwMxJPctGYENVKGUB76JES3WjWu5dLe/rAZF0Cq7VUy5QTQ/NjJHBISrVQCxaSBfIEbIsp9U2Pl1ZvROSaCkb3m71PoY9a4FKKrPuyfSggZV6nZ/98Ee8fPxFGreuE0LyQoxGdfAx/vind/neqVMM1WpEN+i6vbDeNaFnNYwORefufQjQ7DiuFUJ5lPJARgihSyASyoO4Vmh2nLzYfOw2Ni99ExA2J48g614RYuwQiyZ41iVQEGNOFgSV9N+NiNuV222LkW+41u8/uHiBEEpUKlXKeU45z6lUqoRQ5sOL/yKa4SL3fNtrZbjHfrqiIkaGajXefOvXTE1M8q1vHgPv9mQa+PNff8svf/UmgwMDWD+dCIB7lP1HnvpYVKe7Pdq21VtEiDHSaDYZGRpGg4KDubFSr1OpVMhC6GeocRHBzRbUkXdERXAeSNvdCSEwWKvR7rRpNBo0mg1arRaDtVq/4OCYqIgj73zuwUS2HOy+R7mtg8lHZ+evuMiroiqiEtw98mDt4O6brn6g3T2KShBVcZFXPzo7f0WZmwuXzsyfLoriJHA9ZCHIVvO+gCUiErIQgOtFUZy8dGb+9J3h9P85nv8XoqOk71uOnC8AAAAASUVORK5CYII=">
+  <link rel="apple-touch-icon" href="data:image/png;base64,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">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Myco">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#22362A">
+  <link rel="manifest" href="<?= manifestUrl ?>">
+  <?!= include('Styles'); ?>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ============ MODAL DE BIENVENIDA CALIDA (ONBOARDING) ============ -->
+  <div id="modal-onboarding" class="modal-overlay">
+    <div class="modal-tarjeta">
+      <span class="eyebrow">Antes de empezar</span>
+      <h2 class="mb-16">Una aclaracion con cariño</h2>
+      <p class="mb-16">Myco te acompaña a conocer mejor tus habitos de bienestar. Esto <strong>no reemplaza una consulta medica</strong>: es una guia inspiradora, no un diagnostico. Si algo te preocupa, la persona indicada para acompañarte es tu medico de confianza. Cuidarte tambien es preguntar.</p>
+
+      <p style="font-size:13px; font-weight:600; color:var(--forest); margin-bottom:8px;">Elegi tu hongito</p>
+      <div class="grilla-avatares" id="grilla-avatares">
+        <button type="button" class="opcion-avatar seleccionado" data-avatar="a1" style="background:#C9A227;" onclick="elegirAvatar('a1')">🍄</button>
+        <button type="button" class="opcion-avatar" data-avatar="a2" style="background:#8B6A4B;" onclick="elegirAvatar('a2')">🍄</button>
+        <button type="button" class="opcion-avatar" data-avatar="a3" style="background:#5C7A52;" onclick="elegirAvatar('a3')">🍄</button>
+        <button type="button" class="opcion-avatar" data-avatar="a4" style="background:#22362A;" onclick="elegirAvatar('a4')">🍄</button>
+        <button type="button" class="opcion-avatar" data-avatar="a5" style="background:#B9C4AD;" onclick="elegirAvatar('a5')">🍄</button>
+      </div>
+
+      <button class="btn btn-primario" onclick="cerrarOnboarding()">Entendido, vamos</button>
+    </div>
+  </div>
+
+  <!-- ============ BIENVENIDA (publica) ============ -->
+  <div id="vista-bienvenida" class="view activa">
+    <div class="top-nav">
+      <div class="marca">myco<span>.</span></div>
+    </div>
+    <?!= include('RootDivider'); ?>
+    <div class="card centro">
+      <span class="eyebrow">Adaptogenos . bienestar . raiz</span>
+      <h1>Escuchá lo que tu cuerpo necesita</h1>
+      <p class="mb-24">A través de un breve recorrido, descubrí qué hongo adaptógeno puede acompañarte en tu camino hacia un mayor equilibrio y bienestar.</p>
+      <div style="font-size:44px; margin-bottom:20px;">🍄🌿🌳</div>
+      <button class="btn btn-primario mb-16" onclick="mostrarVista('vista-registro')">Crear mi cuenta</button>
+      <button class="btn btn-secundario" onclick="mostrarVista('vista-login')">Ya tengo cuenta</button>
+    </div>
+  </div>
+
+  <!-- ============ REGISTRO ============ -->
+  <div id="vista-registro" class="view">
+    <div class="top-nav">
+      <div class="marca">myco<span>.</span></div>
+    </div>
+    <?!= include('RootDivider'); ?>
+    <div class="card">
+      <span class="eyebrow">Paso 1</span>
+      <h2 class="mb-16">Crea tu cuenta</h2>
+      <div id="error-registro" class="error-msg" style="display:none;"></div>
+      <label for="reg-nombre">Nombre</label>
+      <input type="text" id="reg-nombre" placeholder="Tu nombre">
+      <label for="reg-email">Email</label>
+      <input type="email" id="reg-email" placeholder="tu@email.com">
+      <button class="btn btn-primario mb-16" id="btn-registro" onclick="enviarRegistro()">Crear cuenta</button>
+      <button class="btn-texto" onclick="mostrarVista('vista-bienvenida')">Volver</button>
+    </div>
+  </div>
+
+  <div id="vista-registro-ok" class="view">
+    <div class="card centro">
+      <div style="font-size:44px; margin-bottom:12px;">📩</div>
+      <h2>Revisa tu correo</h2>
+      <p class="mb-24">Te enviamos una contraseña temporal a <strong id="registro-ok-email"></strong>. Volvé a esta pantalla e ingresá con esa contraseña para continuar.</p>
+      <button class="btn btn-primario" onclick="mostrarVista('vista-login')">Ir a iniciar sesion</button>
+    </div>
+  </div>
+
+  <!-- ============ LOGIN ============ -->
+  <div id="vista-login" class="view">
+    <div class="top-nav">
+      <div class="marca">myco<span>.</span></div>
+    </div>
+    <?!= include('RootDivider'); ?>
+    <div class="card">
+      <span class="eyebrow">Bienvenido de nuevo</span>
+      <h2 class="mb-16">Iniciar sesion</h2>
+      <div id="error-login" class="error-msg" style="display:none;"></div>
+      <label for="login-email">Email</label>
+      <input type="email" id="login-email" placeholder="tu@email.com">
+      <label for="login-password">Contraseña</label>
+      <input type="password" id="login-password" placeholder="********">
+      <button class="btn btn-primario mb-16" id="btn-login" onclick="enviarLogin()">Ingresar</button>
+      <div class="centro mb-16"><span class="link-sutil" onclick="irARecuperar()">Olvidaste tu contraseña?</span></div>
+      <button class="btn-texto" onclick="mostrarVista('vista-bienvenida')">Volver</button>
+    </div>
+  </div>
+
+  <!-- ============ OLVIDE MI CONTRASEÑA ============ -->
+  <div id="vista-recuperar" class="view">
+    <div class="top-nav">
+      <div class="marca">myco<span>.</span></div>
+    </div>
+    <?!= include('RootDivider'); ?>
+    <div class="card">
+      <span class="eyebrow">Recuperar acceso</span>
+      <h2 class="mb-16">Olvidaste tu contraseña?</h2>
+      <p class="mb-16" style="font-size:14px;">Ingresá tu email y te mandamos una contraseña temporal nueva.</p>
+      <div id="error-recuperar" class="error-msg" style="display:none;"></div>
+      <label for="recuperar-email">Email</label>
+      <input type="email" id="recuperar-email" placeholder="tu@email.com">
+      <button class="btn btn-primario mb-16" id="btn-recuperar" onclick="enviarRecuperacion()">Enviar contraseña temporal</button>
+      <button class="btn-texto" onclick="mostrarVista('vista-login')">Volver a iniciar sesion</button>
+    </div>
+  </div>
+
+  <div id="vista-recuperar-ok" class="view">
+    <div class="card centro">
+      <div style="font-size:44px; margin-bottom:12px;">📩</div>
+      <h2>Revisa tu correo</h2>
+      <p class="mb-24">Si existe una cuenta con <strong id="recuperar-ok-email"></strong>, te enviamos una contraseña temporal nueva.</p>
+      <button class="btn btn-primario" onclick="mostrarVista('vista-login')">Ir a iniciar sesion</button>
+    </div>
+  </div>
+
+  <!-- ============ CAMBIO DE CONTRASEÑA OBLIGATORIO ============ -->
+  <div id="vista-cambiar-password" class="view">
+    <div class="card">
+      <span class="eyebrow">Antes de continuar</span>
+      <h2 class="mb-16">Elegi tu nueva contraseña</h2>
+      <p class="mb-16" style="font-size:14px;">Es tu primer ingreso. Por seguridad, definí una contraseña propia de al menos 8 caracteres.</p>
+      <div id="error-cambio-password" class="error-msg" style="display:none;"></div>
+      <label for="nueva-password">Nueva contraseña</label>
+      <input type="password" id="nueva-password" placeholder="Minimo 8 caracteres">
+      <label for="repetir-password">Repetir contraseña</label>
+      <input type="password" id="repetir-password" placeholder="Repetir contraseña">
+      <button class="btn btn-primario" onclick="enviarCambioPassword()">Guardar y continuar</button>
+    </div>
+  </div>
+
+  <!-- ============ PANEL (home autenticado) ============ -->
+  <div id="vista-panel" class="view">
+    <div class="top-nav">
+      <div class="marca">myco<span>.</span></div>
+      <div class="top-nav-derecha">
+        <span onclick="irAPerfil()" style="display:flex; align-items:center; cursor:pointer;" title="Editar mi perfil">
+          <span class="avatar-badge" data-avatar-badge></span>
+          <span class="nombre-badge" data-nombre-badge></span>
+        </span>
+        <span class="link-salir" onclick="cerrarSesionCliente()">Cerrar sesion</span>
+      </div>
+    </div>
+    <?!= include('RootDivider'); ?>
+    <div class="card mb-16">
+      <p class="saludo" id="panel-saludo">Hola</p>
+      <p class="mb-16" style="font-size:14px; color:var(--umber);">¿Qué querés hacer hoy?</p>
+
+      <button class="tarjeta-accion" onclick="irACuestionario()">
+        <strong>Hacer el cuestionario</strong>
+        <span>Descubri (o volve a descubrir) tu aliado adaptogeno</span>
+      </button>
+
+      <button class="tarjeta-accion" id="panel-ultimo-resultado" style="display:none;" onclick="verUltimoResultadoDesdePanel()">
+        <strong>Ver mi ultima recomendacion</strong>
+        <span id="panel-ultimo-hongo"></span>
+      </button>
+
+      <button class="tarjeta-accion" onclick="irAPerfil()">
+        <strong>Mi perfil</strong>
+        <span>Nombre, edad, ciudad y tu hongito</span>
+      </button>
+
+      <button class="tarjeta-accion" onclick="verAvisoImportante()">
+        <strong>Una aclaración con cariño</strong>
+        <span>Por qué Myco te acompaña, pero no reemplaza a tu médico</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ PERFIL ============ -->
+  <div id="vista-perfil" class="view">
+    <div class="top-nav">
+      <div class="marca">myco<span>.</span></div>
+      <div class="top-nav-derecha">
+        <span onclick="irAPerfil()" style="display:flex; align-items:center; cursor:pointer;" title="Editar mi perfil">
+          <span class="avatar-badge" data-avatar-badge></span>
+          <span class="nombre-badge" data-nombre-badge></span>
+        </span>
+        <span class="link-salir" onclick="irAlPanel()">Inicio</span>
+      </div>
+    </div>
+    <?!= include('RootDivider'); ?>
+    <div class="card">
+      <span class="eyebrow">Tu perfil</span>
+      <h2 class="mb-16">Contanos un poco de vos</h2>
+      <p class="mb-16" style="font-size:13px; color:var(--umber);">Usamos tu ciudad solo para mostrarte lugares cerca tuyo en el mapa.</p>
+
+      <p style="font-size:13px; font-weight:600; color:var(--forest); margin-bottom:8px;">Tu hongito</p>
+      <div class="grilla-avatares" id="grilla-avatares-perfil">
+        <button type="button" class="opcion-avatar" data-avatar="a1" style="background:#C9A227;" onclick="elegirAvatarPerfil('a1')">🍄</button>
+        <button type="button" class="opcion-avatar" data-avatar="a2" style="background:#8B6A4B;" onclick="elegirAvatarPerfil('a2')">🍄</button>
+        <button type="button" class="opcion-avatar" data-avatar="a3" style="background:#5C7A52;" onclick="elegirAvatarPerfil('a3')">🍄</button>
+        <button type="button" class="opcion-avatar" data-avatar="a4" style="background:#22362A;" onclick="elegirAvatarPerfil('a4')">🍄</button>
+        <button type="button" class="opcion-avatar" data-avatar="a5" style="background:#B9C4AD;" onclick="elegirAvatarPerfil('a5')">🍄</button>
+      </div>
+
+      <label for="perfil-nombre">¿Cómo querés que te llamemos?</label>
+      <input type="text" id="perfil-nombre" placeholder="Tu nombre">
+      <label for="perfil-edad">Edad</label>
+      <input type="number" id="perfil-edad" placeholder="Tu edad" min="1" max="120">
+      <label for="perfil-ciudad">Ciudad</label>
+      <input type="text" id="perfil-ciudad" placeholder="Ej: Buenos Aires">
+      <button class="btn btn-primario mb-16" id="btn-guardar-perfil" onclick="guardarPerfilCliente()">Guardar</button>
+      <button class="btn btn-secundario" onclick="irAlPanel()">Volver al inicio</button>
+    </div>
+  </div>
+
+  <!-- ============ CUESTIONARIO ============ -->
+  <div id="vista-cuestionario" class="view">
+    <div class="top-nav">
+      <div class="marca">myco<span>.</span></div>
+      <div class="top-nav-derecha">
+        <span onclick="irAPerfil()" style="display:flex; align-items:center; cursor:pointer;" title="Editar mi perfil">
+          <span class="avatar-badge" data-avatar-badge></span>
+          <span class="nombre-badge" data-nombre-badge></span>
+        </span>
+        <span class="link-salir" onclick="irAlPanel()">Inicio</span>
+      </div>
+    </div>
+    <div class="progreso-track"><div class="progreso-fill" id="progreso-fill" style="width:0%;"></div></div>
+    <div class="card">
+      <span class="eyebrow" id="pregunta-contador">Paso 1</span>
+      <h2 class="mb-16" id="pregunta-texto">-</h2>
+      <div id="opciones-container"></div>
+    </div>
+  </div>
+
+  <div id="vista-cargando" class="view centro">
+    <?!= include('RootDivider'); ?>
+    <div class="card">
+      <p>Sincronizando micelio...</p>
+    </div>
+  </div>
+
+  <!-- ============ RESULTADO + MAPA + HABITOS ============ -->
+  <div id="vista-resultado" class="view">
+    <div class="top-nav">
+      <div class="marca">myco<span>.</span></div>
+      <div class="top-nav-derecha">
+        <span onclick="irAPerfil()" style="display:flex; align-items:center; cursor:pointer;" title="Editar mi perfil">
+          <span class="avatar-badge" data-avatar-badge></span>
+          <span class="nombre-badge" data-nombre-badge></span>
+        </span>
+        <span class="link-salir" onclick="irAlPanel()">Inicio</span>
+      </div>
+    </div>
+    <?!= include('RootDivider'); ?>
+    <div class="card mb-16">
+      <span class="eyebrow">Tu recomendacion</span>
+      <span class="tag-especie mb-8" id="resultado-hongo" style="display:inline-block;"></span>
+      <h2 class="mb-8" id="resultado-beneficio"></h2>
+      <p class="mb-16" id="resultado-descripcion"></p>
+      <button class="btn btn-primario" onclick="irAExperiencia()">Vivir mi experiencia</button>
+    </div>
+
+    <div id="bloque-beneficios" class="card mb-16" style="display:none;">
+      <span class="eyebrow">Beneficios clave</span>
+      <h3 class="mb-16">Lo que puede aportarte</h3>
+      <ul class="lista-beneficios" id="lista-beneficios"></ul>
+    </div>
+
+    <div id="bloque-habitos" class="card mb-16" style="display:none;">
+      <span class="eyebrow">Buenas practicas</span>
+      <h3 class="mb-16">Para sumar a tu dia a dia</h3>
+      <ul class="lista-habitos" id="lista-habitos"></ul>
+    </div>
+
+    <div id="bloque-consumo" class="card mb-16" style="display:none;">
+      <span class="eyebrow">Recomendacion</span>
+      <h3 class="mb-16">Como se suele consumir</h3>
+      <div class="tarjeta-dosis">
+        <span class="eyebrow-dosis">Dosis y consumo</span>
+        <p id="texto-consumo"></p>
+        <p class="nota-dosis">Guía orientativa, no un reemplazo de indicación profesional. Consultá con tu médico o nutricionista antes de sumar un nuevo suplemento a tu rutina.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="eyebrow">Donde conseguirlo</span>
+      <h3 class="mb-16">Cerca tuyo</h3>
+      <iframe id="mapa-iframe" class="mapa-embed" loading="lazy"></iframe>
+      <div id="lista-puntos-venta"></div>
+    </div>
+  </div>
+
+  <!-- ============ EXPERIENCIAS ============ -->
+  <?!= include('Playlist'); ?>
+  <?!= include('JuegoRunner'); ?>
+  <?!= include('JuegoMemoria'); ?>
+  <?!= include('JuegoPuzzle'); ?>
+
+</div>
+
+<?!= include('Scripts'); ?>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<div id="vista-runner" class="view">
+  <div class="top-nav">
+    <div class="marca">myco<span>.</span></div>
+    <div class="top-nav-derecha">
+      <span onclick="irAPerfil()" style="display:flex; align-items:center; cursor:pointer;" title="Editar mi perfil">
+        <span class="avatar-badge" data-avatar-badge></span>
+        <span class="nombre-badge" data-nombre-badge></span>
+      </span>
+      <span class="link-salir" onclick="irAlPanel()">Inicio</span>
+    </div>
+  </div>
+  <?!= include('RootDivider'); ?>
+  <div class="card centro">
+    <span class="eyebrow">Cordyceps · impulso</span>
+    <h2>Cruzá el bosque</h2>
+    <p class="mb-16">Tocá la pantalla o presioná espacio para saltar las raíces. La energía sube con cada obstáculo.</p>
+
+    <div class="nota-conexion">
+      <span class="eyebrow">Por qué esta experiencia</span>
+      <p>Cordyceps se asocia a la energía física y la resistencia. Este juego te pone a moverte rápido y esquivar obstáculos, el mismo impulso que este hongo aporta a tu cuerpo.</p>
+    </div>
+
+    <canvas id="canvas-runner" width="380" height="200" style="width:100%; max-width:380px; background:#22362A; border-radius:16px; margin-bottom:12px; touch-action:none;"></canvas>
+    <p style="font-family:'JetBrains Mono', monospace; font-size:13px;" id="runner-score">Energía: 0</p>
+
+    <button class="btn btn-secundario" onclick="irACuestionario()">Repetir el cuestionario</button>
+  </div>
+</div>
+
+<script>
+  var runnerCtx, runnerCanvas, runnerLoop, runnerActivo = false;
+  var jugador, obstaculos, puntaje, velocidad;
+
+  function iniciarJuegoRunner() {
+    runnerCanvas = document.getElementById('canvas-runner');
+    runnerCtx = runnerCanvas.getContext('2d');
+    jugador = { x: 40, y: 150, w: 18, h: 24, vy: 0, saltando: false };
+    obstaculos = [];
+    puntaje = 0;
+    velocidad = 3.2;
+    runnerActivo = true;
+    document.getElementById('runner-score').textContent = 'Energía: 0';
+
+    if (runnerLoop) clearInterval(runnerLoop);
+    runnerLoop = setInterval(pasoRunner, 1000/45);
+
+    window.onkeydown = function(e){ if (e.code === 'Space') saltarRunner(); };
+    runnerCanvas.onpointerdown = saltarRunner;
+    spawnObstaculo();
+  }
+
+  function saltarRunner() {
+    if (!jugador.saltando) {
+      jugador.vy = -8.5;
+      jugador.saltando = true;
+    }
+  }
+
+  function spawnObstaculo() {
+    if (!runnerActivo) return;
+    obstaculos.push({ x: 380, w: 14, h: 24 + Math.random()*14 });
+    setTimeout(spawnObstaculo, 1100 + Math.random()*700);
+  }
+
+  function pasoRunner() {
+    if (!runnerActivo) return;
+
+    // física del salto
+    jugador.vy += 0.5;
+    jugador.y += jugador.vy;
+    if (jugador.y > 150) { jugador.y = 150; jugador.vy = 0; jugador.saltando = false; }
+
+    // mover obstáculos
+    obstaculos.forEach(function(o){ o.x -= velocidad; });
+    obstaculos = obstaculos.filter(function(o){ return o.x > -20; });
+
+    // colisión
+    for (var i=0; i<obstaculos.length; i++) {
+      var o = obstaculos[i];
+      var pieJugador = jugador.y + jugador.h;
+      if (o.x < jugador.x + jugador.w && o.x + o.w > jugador.x && pieJugador > 174 - o.h) {
+        return finRunner();
+      }
+    }
+
+    puntaje++;
+    velocidad = 3.2 + Math.floor(puntaje/300) * 0.4;
+    if (puntaje % 10 === 0) document.getElementById('runner-score').textContent = 'Energía: ' + Math.floor(puntaje/5);
+
+    // dibujar
+    runnerCtx.clearRect(0,0,380,200);
+    runnerCtx.fillStyle = '#5C7A52';
+    runnerCtx.fillRect(0,174,380,4);
+    dibujarHongitoJugador();
+    runnerCtx.fillStyle = '#8B6A4B';
+    obstaculos.forEach(function(o){ runnerCtx.fillRect(o.x, 174-o.h, o.w, o.h); });
+  }
+
+  function dibujarHongitoJugador() {
+    var cx = jugador.x + jugador.w / 2;
+    var baseY = jugador.y + jugador.h;
+
+    // Tallo
+    runnerCtx.fillStyle = '#FBF8F0';
+    runnerCtx.fillRect(cx - 4, jugador.y + 10, 8, jugador.h - 10);
+
+    // Sombrero (medio óvalo dorado)
+    runnerCtx.fillStyle = '#C9A227';
+    runnerCtx.beginPath();
+    runnerCtx.ellipse(cx, jugador.y + 10, 11, 10, 0, Math.PI, 2 * Math.PI);
+    runnerCtx.fill();
+
+    // Motitas del sombrero
+    runnerCtx.fillStyle = '#8B6A4B';
+    runnerCtx.beginPath();
+    runnerCtx.arc(cx - 5, jugador.y + 6, 1.4, 0, Math.PI * 2);
+    runnerCtx.arc(cx + 4, jugador.y + 5, 1.2, 0, Math.PI * 2);
+    runnerCtx.fill();
+  }
+
+  function finRunner() {
+    runnerActivo = false;
+    clearInterval(runnerLoop);
+    runnerCtx.fillStyle = 'rgba(34,54,42,0.85)';
+    runnerCtx.fillRect(0,0,380,200);
+    runnerCtx.fillStyle = '#FBF8F0';
+    runnerCtx.font = '16px sans-serif';
+    runnerCtx.textAlign = 'center';
+    runnerCtx.fillText('¡Bien ahí! Energía final: ' + Math.floor(puntaje/5), 190, 95);
+    runnerCtx.font = '13px sans-serif';
+    runnerCtx.fillText('Tocá la pantalla para reintentar', 190, 120);
+    runnerCanvas.onpointerdown = function(){ iniciarJuegoRunner(); };
+  }
+</script>

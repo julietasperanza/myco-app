@@ -1,0 +1,93 @@
+<div id="vista-memoria" class="view">
+  <div class="top-nav">
+    <div class="marca">myco<span>.</span></div>
+    <div class="top-nav-derecha">
+      <span onclick="irAPerfil()" style="display:flex; align-items:center; cursor:pointer;" title="Editar mi perfil">
+        <span class="avatar-badge" data-avatar-badge></span>
+        <span class="nombre-badge" data-nombre-badge></span>
+      </span>
+      <span class="link-salir" onclick="irAlPanel()">Inicio</span>
+    </div>
+  </div>
+  <?!= include('RootDivider'); ?>
+  <div class="card centro">
+    <span class="eyebrow">Melena de León · claridad</span>
+    <h2>Memoria del bosque</h2>
+    <p class="mb-16">Encontrá los pares. Cada acierto es una raíz que conecta.</p>
+
+    <div class="nota-conexion">
+      <span class="eyebrow">Por qué esta experiencia</span>
+      <p>Melena de León estimula la claridad mental y la memoria. Este juego ejercita justamente eso: encontrar patrones y recordar dónde está cada cosa.</p>
+    </div>
+
+    <div id="grilla-memoria" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; max-width:340px; margin:0 auto 16px;"></div>
+    <p style="font-family:'JetBrains Mono', monospace; font-size:13px;" id="memoria-movimientos">Movimientos: 0</p>
+
+    <button class="btn btn-secundario" onclick="irACuestionario()">Repetir el cuestionario</button>
+  </div>
+</div>
+
+<script>
+  var memoriaCartas, memoriaVolteadas, memoriaBloqueado, memoriaMovimientos, memoriaPares;
+  var SIMBOLOS_MEMORIA = ['🍄','🌿','🌳','🪵','🌱','🍂','🦌','🌰'];
+
+  function iniciarJuegoMemoria() {
+    var simbolos = SIMBOLOS_MEMORIA.concat(SIMBOLOS_MEMORIA);
+    memoriaCartas = simbolos
+      .map(function(s){ return { simbolo: s, volteada:false, resuelta:false }; })
+      .sort(function(){ return Math.random() - 0.5; });
+    memoriaVolteadas = [];
+    memoriaBloqueado = false;
+    memoriaMovimientos = 0;
+    memoriaPares = 0;
+    document.getElementById('memoria-movimientos').textContent = 'Movimientos: 0';
+    renderizarMemoria();
+  }
+
+  function renderizarMemoria() {
+    var grilla = document.getElementById('grilla-memoria');
+    grilla.innerHTML = '';
+    memoriaCartas.forEach(function(carta, idx){
+      var celda = document.createElement('div');
+      celda.style.cssText = 'aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer; user-select:none; transition:background 0.2s;';
+      celda.style.background = (carta.volteada || carta.resuelta) ? '#FBF8F0' : '#5C7A52';
+      celda.style.border = '1.5px solid #B9C4AD';
+      celda.textContent = (carta.volteada || carta.resuelta) ? carta.simbolo : '';
+      celda.onclick = function(){ voltearCarta(idx); };
+      grilla.appendChild(celda);
+    });
+  }
+
+  function voltearCarta(idx) {
+    if (memoriaBloqueado) return;
+    var carta = memoriaCartas[idx];
+    if (carta.volteada || carta.resuelta) return;
+
+    carta.volteada = true;
+    memoriaVolteadas.push(idx);
+    renderizarMemoria();
+
+    if (memoriaVolteadas.length === 2) {
+      memoriaMovimientos++;
+      document.getElementById('memoria-movimientos').textContent = 'Movimientos: ' + memoriaMovimientos;
+      memoriaBloqueado = true;
+      var a = memoriaCartas[memoriaVolteadas[0]];
+      var b = memoriaCartas[memoriaVolteadas[1]];
+
+      setTimeout(function(){
+        if (a.simbolo === b.simbolo) {
+          a.resuelta = true; b.resuelta = true;
+          memoriaPares++;
+        } else {
+          a.volteada = false; b.volteada = false;
+        }
+        memoriaVolteadas = [];
+        memoriaBloqueado = false;
+        renderizarMemoria();
+        if (memoriaPares === SIMBOLOS_MEMORIA.length) {
+          setTimeout(function(){ alert('¡Completaste el bosque en ' + memoriaMovimientos + ' movimientos!'); }, 200);
+        }
+      }, 700);
+    }
+  }
+</script>
