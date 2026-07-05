@@ -59,13 +59,21 @@ la persona que la usa dependa de un modelo en tiempo real.
 
 - `01-especificacion-inicial/` — el prompt y documento con el que arrancó el
   proyecto, antes de escribir código.
-- `02-mockups/` — capturas de pantallas propuestas antes de programarlas.
+- `02-capturas-del-proceso/` — capturas reales de pantallas, bugs detectados
+  y correcciones a lo largo del desarrollo.
 - `03-app-funcional/` — el código completo y funcional de la aplicación
   (Google Apps Script + HTML/CSS/JS).
 - `informe-final.pdf` — el informe del trabajo (introducción, marco
   conceptual, metodología, resultados, análisis crítico y conclusiones).
+- `registro-de-iteraciones.docx` — historial detallado de todas las rondas de
+  feedback, bugs encontrados y mejoras aplicadas durante el desarrollo.
 
 ## Instalación
 
 Los pasos detallados para instalar la app en una cuenta propia de Google
 están en `03-app-funcional/README.md`.
+
+## Autora
+
+Julieta Speranza — Diplomatura en IA Aplicada a Entornos Digitales de
+Gestión, FCE-UBA, Cohorte 2026.
