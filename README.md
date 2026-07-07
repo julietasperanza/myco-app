@@ -63,6 +63,7 @@ la persona que la usa dependa de un modelo en tiempo real.
   y correcciones a lo largo del desarrollo.
 - `03-app-funcional/` — el código completo y funcional de la aplicación
   (Google Apps Script + HTML/CSS/JS).
+- `04-presentacion-y-demo`: presentación (PPT) y video demostrativo del proyecto
 - `informe-final.pdf` — el informe del trabajo (introducción, marco
   conceptual, metodología, resultados, análisis crítico y conclusiones).
 - `registro-de-iteraciones.docx` — historial detallado de todas las rondas de
